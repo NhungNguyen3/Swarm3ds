@@ -14,18 +14,6 @@ using static UnityEngine.GraphicsBuffer;
 
 public class Gun : MonoBehaviour
 {
-    [SerializeField] Bullet bulletPrefab;
-    [SerializeField] Bullet bulletPrefabAngle;
-    [SerializeField] Bullet bulletRocket;
-    [SerializeField] Transform FirePoint;
-
-    private IObjectPool<Bullet> objectPool;
-    private IObjectPool<Bullet> objectPoolAngle;
-    private IObjectPool<Bullet> objectPoolRocket;
-    [SerializeField] int defaultCapacity = 20;
-    [SerializeField] int maxSize = 100;
-    bool collectionCheck = true;
-
     public int numberOfBullets = 8; // Number of bullets to shoot
     public float angleBetweenBullets = 45f; // Angle between each bullet in degrees
     public float bulletSpeed = 10f;
@@ -43,52 +31,9 @@ public class Gun : MonoBehaviour
 
     private void Awake()
     {
-        objectPool = new ObjectPool<Bullet>(CreateBullet, OnGetFromPool, OnReleaseToPool,
-            OnDestroyPooledObject, collectionCheck, defaultCapacity, maxSize);
-        objectPoolAngle = new ObjectPool<Bullet>(CreateBulletAngle, OnGetFromPool, OnReleaseToPool,
-            OnDestroyPooledObject, collectionCheck, defaultCapacity, maxSize);
-        objectPoolRocket = new ObjectPool<Bullet>(CreateBulletRocket, OnGetFromPool, OnReleaseToPool,
-            OnDestroyPooledObject, collectionCheck, defaultCapacity, maxSize);
     }
 
-    #region Pooling
-    private Bullet CreateBullet()
-    {
-        Bullet bulletInstance = Instantiate(bulletPrefab);
-        bulletInstance.ObjectPool = objectPool;
-        return bulletInstance;
-    }
-
-    private Bullet CreateBulletAngle()
-    {
-        Bullet bulletInstance = Instantiate(bulletPrefabAngle);
-        bulletInstance.ObjectPool = objectPoolAngle;
-        return bulletInstance;
-    }
-
-    private Bullet CreateBulletRocket()
-    {
-        Bullet bulletInstance = Instantiate(bulletRocket);
-        bulletInstance.ObjectPool = objectPoolAngle;
-        return bulletInstance;
-    }
-
-    private void OnGetFromPool(Bullet pooledObject)
-    {
-        pooledObject.gameObject.SetActive(true);
-    }
-
-    private void OnReleaseToPool(Bullet pooldedObject)
-    {
-        pooldedObject.gameObject.SetActive(false);
-
-    }
-
-    private void OnDestroyPooledObject(Bullet pooldedObject)
-    {
-        Destroy(pooldedObject.gameObject);
-    }
-    #endregion
+   
 
     public void CreateData()
     {
@@ -111,7 +56,7 @@ public class Gun : MonoBehaviour
 
     public IEnumerator Fire(Vector3 pos)
     {
-        Bullet bulletObject = objectPool.Get();
+        BulletObject bulletObject = BulletsManager.Instance.objectPool.Get();
        // bulletObject.transform.SetLocalPositionAndRotation(transform.position, transform.rotation);
         bulletObject.transform.SetLocalPositionAndRotation(transform.position, Quaternion.Euler(0, 0, 0));
         Rigidbody rb = bulletObject.GetComponent<Rigidbody>();
@@ -131,13 +76,12 @@ public class Gun : MonoBehaviour
     public BulletMovement bulletMove;
     public IEnumerator ShootBullets()
     {
-        float startAngle = 0;
         float angleIncrement = 360f / numberOfBullets;
 
         for (int i = 0; i < numberOfBullets; i+=3)
         {
             List<Transform> bullets = new();
-            Bullet bulletObjectAngle = objectPoolAngle.Get();
+            BulletObject bulletObjectAngle = BulletsManager.Instance.objectPoolAngle.Get();
             bulletObjectAngle.transform.SetLocalPositionAndRotation(transform.position, transform.rotation);
             bulletObjectAngle.gun = this;
             bullets.Add(bulletObjectAngle.transform);
@@ -263,7 +207,7 @@ public class Gun : MonoBehaviour
     {
         for (int i = 0; i < bulletCount; i++)
         {
-            var bullet = objectPoolAngle.Get();
+            var bullet = BulletsManager.Instance.objectPoolAngle.Get();
             float startAngle = 0;
             float angleIncrement = 7.5f;
             float angle = startAngle + i * angleIncrement;
@@ -281,60 +225,71 @@ public class Gun : MonoBehaviour
     }
 
     public int bulletCount2 = 4;
+    public float bulletSubSpeed = 20f;
     public GameObject subGun1;
     public GameObject subGun2;
     public GameObject subGun3;
     public GameObject subGun4;
+
+    public GameObject gunRocket;
+    [BurstCompile]
     public IEnumerator ShootBullets2(GameObject subGun)
     {
-        for (int i = 0; i < bulletCount2; i++)
-        {
-            var bullet = objectPool.Get();
-            float startAngle = 0;
+            var bullet = BulletsManager.Instance.objectPool.Get();
+/*            float startAngle = 0;
             float angleIncrement = 7.5f;
             float angle = startAngle + i * angleIncrement;
-
+*/
             bullet.transform.SetLocalPositionAndRotation(subGun.transform.position, Quaternion.Euler(0, 0, 0));
-            Vector3 direction = subGun.transform.up;
+            Vector3 direction = subGun.transform.forward;
 
            // bullet.transform.rotation = Quaternion.Euler(0, 0, angle - 90);
             Rigidbody rb = bullet.GetComponent<Rigidbody>();
-            rb.velocity = direction * bulletSpeed;
+            rb.velocity = direction * bulletSubSpeed;
 
-            bullet.transform.up = rb.velocity;
+            //bullet.transform.up = rb.velocity;
             yield return new WaitForSeconds(0.05f);
-        }
+
     }
 
     public IEnumerator Shooting2()
     {
+        SoundManager.Instance.PlaySound(SoundName.Gun_Shoot_2, .4f);
         StartCoroutine(ShootBullets2(subGun1));
         StartCoroutine(ShootBullets2(subGun2));
         StartCoroutine(ShootBullets2(subGun3));
         StartCoroutine(ShootBullets2(subGun4));
-        yield return new WaitForSeconds(.1f);
+        yield return null;
+       // yield return new WaitForSeconds(.1f);
     }
 
     [BurstCompile]
     public IEnumerator ShootBulletRocket(Vector3 pos)
     {
-        Debug.Log("pos");
-        Bullet bulletObject = objectPoolRocket.Get();
-        bulletObject.transform.SetLocalPositionAndRotation(this.transform.position, Quaternion.Euler(0, 0, 0));
+        yield return new WaitForSeconds(2f);
+        SoundManager.Instance.PlaySound(SoundName.Missile_Shoot_1, .8f);
+        BulletObject bulletObject = BulletsManager.Instance.objectPoolRocket.Get();
+        bulletObject.transform.SetLocalPositionAndRotation(gunRocket.transform.position, Quaternion.Euler(0, 0, 0));
         Rigidbody rb = bulletObject.GetComponent<Rigidbody>();
 
         bulletObject.sl.enabled = false;
 
+
+        //bulletObject.transform.position = Vector3.Slerp(gunRocket.transform.position, pos, 1f);
         bulletObject.transform.DOMove(pos, 1f);
         bulletObject.transform.DOLookAt(pos, 0f);
         yield return null;
     }
 
+
+
+
+
     public IEnumerator DroneShoot(Transform firePoint, Vector3 target)
     {
 
-        var bullet = objectPoolAngle.Get();
-
+        var bullet = BulletsManager.Instance.objectPoolAngle.Get();
+        SoundManager.Instance.PlaySound(SoundName.Gun_Shoot_3, 1f);
         bullet.transform.SetLocalPositionAndRotation(firePoint.transform.position, Quaternion.Euler(0, 0, 0));
         bullet.transform.rotation = firePoint.rotation;
         Rigidbody rb = bullet.GetComponent<Rigidbody>();
@@ -349,7 +304,7 @@ public class Gun : MonoBehaviour
     public IEnumerator ShootingNormal(Transform firePoint)
     {
 
-        var bullet = objectPoolAngle.Get();
+        var bullet = BulletsManager.Instance.objectPoolAngle.Get();
 
         bullet.transform.SetLocalPositionAndRotation(firePoint.transform.position, Quaternion.Euler(0, 0, 0));
         bullet.transform.rotation = firePoint.rotation;
@@ -361,4 +316,32 @@ public class Gun : MonoBehaviour
         yield return new WaitForSeconds(0.05f);
     }
 
+    public float detectionRadius = 50f;
+    public GameObject point2;
+    public LayerMask enemyLayer;
+
+    public int timeEnable = 4;
+    public GameObject fireVfx;
+    public float fireDmg = 2f;
+    public IEnumerator FireBreath()
+    {
+        fireVfx.SetActive(true);
+        for(int i = 0; i < timeEnable; i++)
+        {
+            Collider[] hitColliders = Physics.OverlapCapsule(transform.position, point2.transform.position, detectionRadius, enemyLayer);
+
+            foreach (Collider col in hitColliders)
+            {
+                IDamageable damageable = col.GetComponent<IDamageable>();
+                if (damageable != null)
+                {
+                    damageable.Damage(fireDmg);
+                }
+            }
+
+            yield return new WaitForSeconds(.2f);
+        }
+        yield return new WaitForEndOfFrame();
+        fireVfx.SetActive(false);
+    }
 }

@@ -7,11 +7,12 @@ using UnityEngine;
 using UnityEngine.Jobs;
 using Random = UnityEngine.Random;
 using UnityEngine.Pool;
-public class SpawnManager : MonoBehaviour
+public class SpawnManager : Singleton<SpawnManager>
 {
-    [SerializeField] private ListObjectVariable objects;
+    [SerializeField] public List<Enemy> objects;
+    [SerializeField] public List<Enemy> objectsRange;
     [SerializeField] private Enemy objectsPrefabs;
-    [SerializeField] private int objectCount = 10;
+    [SerializeField] private int objectCount;
     [SerializeField] int defaultCapacity = 400;
     [SerializeField] int maxSize = 600;
     bool collectionCheck = true;
@@ -20,33 +21,41 @@ public class SpawnManager : MonoBehaviour
     private void Awake()
     {
         Application.targetFrameRate = 60;
-        if (objects.enemies.Count > 0) objects.enemies.Clear();
-
-        objectPool = new ObjectPool<Enemy>(CreateBullet, OnGetFromPool, OnReleaseToPool,
-            OnDestroyPooledObject, collectionCheck, defaultCapacity, maxSize);
-
-
-        for (int i=0; i< objectCount; i++)
-        {
-            Vector3 position = new Vector3(Random.Range(0f, 300f), 0, Random.Range(0f, 300f));
-            var newEnemy = objectPool.Get();
-            newEnemy.transform.position = position;
-            objects.enemies.Add(newEnemy.transform);
-        }
+        SpawnEnemies();
     }
 
     private void Start()
     {
-
+        
     }
 
     public void SpawnEnemies()
     {
+        if (objects.Count > 0) objects.Clear();
+        if (objectsRange.Count > 0) objectsRange.Clear();
 
-            Vector3 position = new Vector2(Random.Range(-20f, 20f), Random.Range(-20f, 20f));
+        objectPool = new ObjectPool<Enemy>(CreateBullet, OnGetFromPool, OnReleaseToPool,
+            OnDestroyPooledObject, collectionCheck, defaultCapacity, maxSize);
+        GameObject player = GameObject.FindGameObjectWithTag("Head");
+
+        for (int i = 0; i < objectCount; i++)
+        {
+            Vector3 position = new Vector3(Random.Range(0f, 300f), 0, Random.Range(0f, 300f));
             var newEnemy = objectPool.Get();
+            newEnemy.playerHead = player;
             newEnemy.transform.position = position;
-            objects.enemies.Add(newEnemy.transform);
+            newEnemy.name = "enemy " + i;
+            if (i % 2 == 0)
+            {
+                newEnemy.type = EnemyType.Melee;
+            }
+            else
+            {
+                newEnemy.type = EnemyType.Range;
+            }
+            newEnemy.SetSkin();
+            objects.Add(newEnemy);
+        }
 
     }
 
@@ -58,6 +67,9 @@ public class SpawnManager : MonoBehaviour
         bulletInstance.ObjectPool = objectPool;
         return bulletInstance;
     }
+
+
+
 
 
     private void OnGetFromPool(Enemy pooledObject)

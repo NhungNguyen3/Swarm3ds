@@ -58,6 +58,7 @@ public class DroneController : MonoBehaviour
     {
         if(canAttack)
         {
+           // SoundManager.Instance.PlaySound(SoundName.Gun_Shoot_1, .2f);
             StartCoroutine(gun.DroneShoot(this.transform, pos));
             canAttack = false;
         }

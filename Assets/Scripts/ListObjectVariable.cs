@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
-[CreateAssetMenu(menuName ="ScriptableObject/List GameObject Variable")]
+[CreateAssetMenu(menuName = "ScriptableObject/List GameObject Variable")]
 public class ListObjectVariable : ScriptableObject
 {
-    public List<Transform> enemies = new List<Transform>();
+    public List<Enemy> enemies = new List<Enemy>();
 }

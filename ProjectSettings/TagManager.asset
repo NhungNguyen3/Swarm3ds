@@ -8,6 +8,7 @@ TagManager:
   - Enemy
   - InteractableItem
   - Projectile
+  - Head
   layers:
   - Default
   - TransparentFX
@@ -20,8 +21,8 @@ TagManager:
   - 
   - 
   - 
-  - 
   - InteractableItem
+  - EnemyProjectile
   - Player
   - Enemy
   - Projectile

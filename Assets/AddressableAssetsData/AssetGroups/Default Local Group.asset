@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Default Local Group
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 010562d8e579f1f42bb84708e5de7454
+  m_SerializeEntries:
+  - m_GUID: 23777d1556719574185e2f9c5309acf0
+    m_Address: Assets/Sounds/Explosion_2.wav
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Sfx
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 23ed13a17057e6e45ad3a0448a026d9e
+    m_Address: Assets/Sounds/Gun_Shoot_2.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Sfx
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2e05caa640d7db14081b782c1f536f56
+    m_Address: Assets/Sounds/Missile_Shoot_1.wav
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Sfx
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 57201e03d8c45fc47befa0de000aa24a
+    m_Address: Assets/Sounds/Gun_Shoot_3.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Sfx
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8dbbed00094aee74ba8251836ea1b2fe
+    m_Address: Assets/Sounds/Blood_Splat_1.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Sfx
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d14c2362ccee67148834fbb36191d8c5
+    m_Address: Assets/Sounds/Gun_Shoot_1.wav
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Sfx
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: daaa137f5cb17804799a314a4cc2a994
+    m_Address: Assets/Sounds/DM-CGS-45.wav
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Sfx
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e802f0f39c21f2247ae29ad13d6c7fe8
+    m_Address: Assets/Sounds/Explosion_1.wav
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Sfx
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d3e6008096312c148827509f6a0002ee, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 9afaef25a6e63ad4ca9ac996e3e5759c, type: 2}
+    - {fileID: 11400000, guid: 9fd84ff533b1e694aab6ff6b3b0ac656, type: 2}

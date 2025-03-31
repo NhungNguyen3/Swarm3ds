@@ -6,6 +6,8 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public TextMeshProUGUI fpsDisplay;
+    public TextMeshProUGUI hpText;
+    public PlayerController playerController;
     float fps;
 
     private void Start()
@@ -17,5 +19,6 @@ public class GameManager : MonoBehaviour
     {
         fps = (int)(1f/Time.smoothDeltaTime);
         fpsDisplay.text = "FPS: " + fps.ToString();
+        hpText.text = "HP: " + playerController.hp.ToString();
     }
 }

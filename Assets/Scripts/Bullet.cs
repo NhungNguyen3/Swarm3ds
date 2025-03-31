@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
-public class Bullet : MonoBehaviour
+public class BulletObject : MonoBehaviour
 {
-    private IObjectPool<Bullet> objectPool;
-    public IObjectPool<Bullet> ObjectPool { set => objectPool = value; }
+    private IObjectPool<BulletObject> objectPool;
+    public IObjectPool<BulletObject> ObjectPool { set => objectPool = value; }
 
     public Gun gun;
 
@@ -17,10 +17,13 @@ public class Bullet : MonoBehaviour
     public CapsuleCollider sl;
     public float maxDistance;
     public float lifeTime = 4f;
+    float timer;
     bool collide = false;
 
     [SerializeField] BulletType bulletType;
     [SerializeField] float explodeRadius;
+
+    public GameObject model;
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -33,25 +36,31 @@ public class Bullet : MonoBehaviour
             this.sl.enabled = false;
             this.rb.isKinematic = true;
         }
-
+        timer = lifeTime;
     }
 
+    bool isExplode = false;
     private void Update()
     {
-/*        float distance = Vector2.Distance(transform.position, pos);
-        if(distance > maxDistance) objectPool.Release(this);*/
-        lifeTime-=Time.deltaTime;
+        /*        float distance = Vector2.Distance(transform.position, pos);
+                if(distance > maxDistance) objectPool.Release(this);*/
+        timer -= Time.deltaTime;
 
-        if (lifeTime <= 0)
+        if (timer <= 0)
         {
             if(this.bulletType == BulletType.Rocket)
             {
-                StartCoroutine(Explode());
+                if (!isExplode)
+                {
+                    isExplode = true;
+                    StartCoroutine(Explode());
+                }
+                else return;
             }
             else
             {
                 objectPool.Release(this);
-                lifeTime = .5f;
+                timer = lifeTime;
             }
 
         }
@@ -60,27 +69,31 @@ public class Bullet : MonoBehaviour
     public float detectionRadius = 5f;
     public LayerMask enemyLayer;
     public ParticleSystem explodeFx;
+    public float bulletDmg = 3f;
     IEnumerator Explode()
     {
+        SoundManager.Instance.PlaySound(SoundName.Explosion_1, 1f);
         rb.isKinematic = false;
+        model.SetActive(false);
         explodeFx.gameObject.SetActive(true);
        // explodeFx.Play();
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRadius, enemyLayer);
         float closestDistance = detectionRadius;
-
         foreach (Collider col in hitColliders)
         {
             IDamageable damageable = col.GetComponent<IDamageable>();
             if(damageable!=null)
             {
-                damageable.Damage();
+                damageable.Damage(bulletDmg);
             }
         }
         yield return new WaitForSeconds(1f);
         explodeFx.gameObject.SetActive(false);
         rb.isKinematic = true;
-        lifeTime = 1f;
+        timer = lifeTime;
         objectPool.Release(this);
+        model.SetActive(true);
+        isExplode = false;
     }
 
     public void Target(Vector3 target)
@@ -94,9 +107,16 @@ public class Bullet : MonoBehaviour
     {
         if (collision.gameObject && !collide)
         {
-            lifeTime = .5f;
+
+            if (collision.TryGetComponent<IDamageable>(out var damageable))
+            {
+                damageable.Damage(bulletDmg);
+                Debug.Log("====" + collision.gameObject.name);
+            }
+            timer = lifeTime;
             collide = true;
             objectPool.Release(this);
+
             // LeanPool.Despawn(this);
             //LeanPool.Despawn(this);
            // gun.bullets.Remove(this.transform);

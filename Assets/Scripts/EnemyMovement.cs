@@ -12,49 +12,56 @@ using UnityEngine.EventSystems;
 
 public class EnemyMovement : MonoBehaviour
 {
-    [SerializeField] ListObjectVariable listEnemy;
-    public float speedSpawn = .4f;
-    float timer;
-    public Enemy enemyPrefabs;
-    public List<Enemy> enemies = new();
-    public Transform spawnPoint;
-
-    bool startSpawn = false;
-
+    [SerializeField] List<Enemy> listEnemy;
     private TransformAccessArray transformAccessArray;
     private NativeArray<EnemyData> enemyDatas;
     GameObject player;
-
-    [SerializeField] float minDistance = 2.4f;
 
     private struct EnemyData
     {
         public float3 position;
         public float3 velocity;
-        public float3 target;  
+        public float3 target;
+        public float speed;
+        public float minDistance;
     }
 
 
     private void Start()
     {
+        listEnemy = SpawnManager.Instance.objects;
         player = GameObject.FindGameObjectWithTag("Player");
-        var enemyCount = listEnemy.enemies.Count;
+        var enemyCount = listEnemy.Count;
         transformAccessArray = new TransformAccessArray(enemyCount);
         enemyDatas = new NativeArray<EnemyData>(enemyCount, Allocator.Persistent);
 
         for (int i = 0; i < enemyCount; i++)
         {
             float speed = Random.Range(1f, 5f);
-            transformAccessArray.Add(listEnemy.enemies[i].transform);
+            transformAccessArray.Add(listEnemy[i].transform);
+            listEnemy[i].OnSlow += OnEnemySlow;
             enemyDatas[i] = new EnemyData
             {
-                position = listEnemy.enemies[i].transform.position,
-                velocity = listEnemy.enemies[i].transform.forward,
+                position = listEnemy[i].transform.position,
+                velocity = listEnemy[i].transform.forward,
+                speed = listEnemy[i].speed,
                 target = player.transform.position,
+                minDistance = listEnemy[i].minDis
             };
         }
     }
 
+    private void OnEnemySlow(Enemy obj)
+    {
+        var tmp = enemyDatas[listEnemy.IndexOf(obj)];
+        tmp.speed = obj.speed;
+        enemyDatas[listEnemy.IndexOf(obj)] =tmp;
+
+        //enemyDatas[]
+    }
+
+    public float detectionRadius;
+    public LayerMask enemyLayer;
     private void Update()
     {
 
@@ -63,8 +70,6 @@ public class EnemyMovement : MonoBehaviour
             enemies = enemyDatas,
             deltaTime = Time.deltaTime,
             pos = player.transform.position,
-            minDis = minDistance
-            //speed = 2f
         };
 
         JobHandle enemyMovementJobHandle = enemyMovementJob.Schedule(transformAccessArray);
@@ -77,7 +82,8 @@ public class EnemyMovement : MonoBehaviour
         public NativeArray<EnemyData> enemies;
         public float deltaTime;
         public float speed;
-        public float minDis;
+        public float detectionRadius;
+        public LayerMask enemyLayer;
         public Vector3 pos;
         public void Execute(int index, TransformAccess transform)
         {
@@ -85,9 +91,14 @@ public class EnemyMovement : MonoBehaviour
             Vector3 target = enemies[index].target;
             Vector3 direction = target - position;
             float distace = Vector3.Distance(pos, position);
-            if (distace <= minDis) speed = 0;
-            else speed = 4f;
-            transform.position = Vector3.MoveTowards(transform.position, target, speed * deltaTime);
+            float spd = enemies[index].speed;
+            float minDis = enemies[index].minDistance;
+            if (distace <= minDis) 
+            {
+                spd = 0;
+            }
+          
+            transform.position = Vector3.MoveTowards(transform.position, target, spd * deltaTime);
 
 
 
@@ -98,7 +109,9 @@ public class EnemyMovement : MonoBehaviour
                 {
                     position = transform.position,
                     velocity = direction,
+                    speed = spd,
                     target = pos,
+                    minDistance = minDis,
                 };
         }
     }
@@ -109,23 +122,4 @@ public class EnemyMovement : MonoBehaviour
         enemyDatas.Dispose();
     }
 
-
-
-/*    public void SpawnEnemies()
-    {
-
-        var newEnemy = LeanPool.Spawn(enemyPrefabs, spawnPoint);
-        int x = Random.Range(-20, 20);
-        int z = Random.Range(-20, 20);
-        Vector3 pos = new(x, z, 0);
-
-        newEnemy.transform.position = pos;
-
-        enemies.Add(newEnemy);
-    }
-
-    public void OnClickStart()
-    {
-        startSpawn = !startSpawn;
-    }*/
 }

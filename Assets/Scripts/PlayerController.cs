@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 using DG.Tweening;
 using Unity.Burst;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IDamageable
 {
     public float detectionRadius = 50f;
     public LayerMask enemyLayer;
@@ -16,12 +16,19 @@ public class PlayerController : MonoBehaviour
    public Rigidbody rb;
 
     public Transform firePoint;
-    public float attackSpeed = .2f;
-    public Bullet bullet;
+    public float attackSpeed = .05f;
     public Gun gun;
     float timer;
     public bool isLookAtEnemy = false;
     public GameObject cursor;
+
+    public AnimationController1 playerAnimController;
+
+    public float hpShield = 50f;
+    private void Start()
+    {
+        hp = maxHP;
+    }
 
 
     private void OnTriggerEnter(Collider collision)
@@ -40,6 +47,14 @@ public class PlayerController : MonoBehaviour
         rb.velocity = direction;
 
         //transform.DOMove(direction, 1f);
+        if(variableJoystick.Horizontal != 0 || variableJoystick.Horizontal != 0)
+        {
+            playerAnimController.PlayAnimation("isMoving",true);
+        }
+        else
+        {
+            playerAnimController.PlayAnimation("isMoving", false);
+        }
 
         this.transform.rotation = Quaternion.LookRotation(direction);
         //rb.AddForce(direction * speed * Time.fixedDeltaTime, ForceMode.VelocityChange);
@@ -50,14 +65,65 @@ public class PlayerController : MonoBehaviour
 
         //   gun.transform.up = rb.velocity;
 
-        /* if(variableJoystick.Horizontal < 0) transform.rotation = Quaternion.Euler(0,180,0);
-         else if (variableJoystick.Horizontal > 0) transform.rotation = Quaternion.Euler(0, 0, 0);*/
     }
 
+
+    public void GetHP(float value)
+    {
+        hp += value;
+        if (hp >= maxHP) hp = maxHP;
+    }
+
+
+    public void Damage(float dmg)
+    {
+        Debug.Log("====TAKE DMG");
+        GetDmg(dmg);
+        /* Dead();*/
+
+    }
+    
+    public float hp;
+    public float maxHP;
+    public GameObject shieldFx;
+    public void GetDmg(float dmg)
+    {
+        if(hpShield >=0 )
+        {
+            hpShield -= dmg;
+        }
+        else
+        {
+            shieldFx.SetActive(false);
+            hp -= dmg;
+            if(hp<=0 )
+            {
+                Debug.Log(" YOU DEad");
+            }
+        }
+
+    }
+
+
+
+    public IEnumerator ShieldRegen()
+    {
+        yield return new WaitForSeconds(4f);
+        shieldFx.SetActive(true);
+        hpShield = 50f;
+    }
+    float timer2 = 2f;
+    bool canRocket = false;
     private void Update()
     {
-
         timer -= Time.deltaTime;
+        timer2 -= Time.deltaTime;
+        if(timer2 <= 0)
+        {
+            timer2 = 2f;
+            canRocket = true;
+            FindClosetEnemy2();
+        }
         if (timer <= 0)
         {
             timer = attackSpeed;
@@ -66,9 +132,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void Gun2()
+    {
+        StartCoroutine(gun.FireBreath());
+    }
     
-
-    Transform closestEnemy = null; 
     [BurstCompile]
     public void FindClosetEnemy()
     {
@@ -91,31 +159,58 @@ public class PlayerController : MonoBehaviour
 
         if (closestEnemy != null)
         {
+            gun.transform.DOLookAt(closestEnemy.position, 0f);
             Fire(closestEnemy.position);
-            Debug.Log(closestEnemy.transform.position);
         }
         else return;
 
     }
 
-    IEnumerator AttackAnim()
+
+    [BurstCompile]
+    public void FindClosetEnemy2()
     {
-        isLookAtEnemy = true;
-        Fire(closestEnemy.position);
 
-        timer = attackSpeed;
+        Transform closestEnemy = null;
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRadius, enemyLayer);
+        float closestDistance = detectionRadius;
 
-        yield return new WaitForSeconds(2f);
-        isLookAtEnemy = false;
-        closestEnemy = null;
+
+
+        foreach (Collider col in hitColliders)
+        {
+            float distance = Vector2.Distance(transform.position, col.transform.position);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestEnemy = col.transform;
+            }
+        }
+
+        if (closestEnemy != null)
+        {
+            Fire2(closestEnemy.position);
+        }
+        else return;
+
     }
 
 
+    public void Fire2(Vector3 pos)
+    {
+        if (canRocket)
+        {
+
+            StartCoroutine(gun.ShootBulletRocket(pos));
+            canRocket = false;
+        }
+        else return;
+    }
     public void Fire(Vector3 pos)
     {
         if (canAttack)
         {
-            StartCoroutine(gun.ShootBulletRocket(pos));
+            StartCoroutine(gun.Shooting2());
             canAttack = false;
         }
         else return;

@@ -17,7 +17,7 @@ GameObject:
   m_TagString: Projectile
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4
   m_IsActive: 1
 --- !u!4 &921683440081285738
 Transform:
@@ -53,7 +53,7 @@ MonoBehaviour:
   rb: {fileID: 6926921522668392572}
   sl: {fileID: 2419062960027745864}
   maxDistance: 0
-  lifeTime: 4
+  lifeTime: 1.5
   bulletType: 0
   explodeRadius: 0
   detectionRadius: 5
@@ -61,6 +61,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   explodeFx: {fileID: 0}
+  bulletDmg: 3
 --- !u!136 &2419062960027745864
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -203,6 +204,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Layer
       value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 9e813f80508f8e947b8e69546977db35,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

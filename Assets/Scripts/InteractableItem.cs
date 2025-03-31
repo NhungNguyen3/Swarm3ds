@@ -11,6 +11,9 @@ public class InteractableItem : MonoBehaviour, IInteractable
     public LayerMask enemyLayer;
     public GameObject model;
     public CapsuleCollider cl;
+    [Header("Health Collectible")]
+    public int hpRegen = 10;
+    public PlayerController player;
     public void Pickup()
     {
         switch (type)
@@ -26,7 +29,7 @@ public class InteractableItem : MonoBehaviour, IInteractable
                 break;
             case InteractableItemType.HealthCollectible:
                 Debug.Log("HEALTH COLLECTIBLE");
-                StartCoroutine(Respawn(false));
+                Heath();
                 break;
         }
     }
@@ -34,6 +37,7 @@ public class InteractableItem : MonoBehaviour, IInteractable
 
     public IEnumerator Explode()
     {
+        SoundManager.Instance.PlaySound(SoundName.Explosion_2,1f);
         explodeFx.gameObject.SetActive(true);
         model.SetActive(false);
         cl.enabled = false;
@@ -45,7 +49,7 @@ public class InteractableItem : MonoBehaviour, IInteractable
             IDamageable damageable = col.GetComponent<IDamageable>();
             if (damageable != null)
             {
-                damageable.Damage();
+                damageable.Damage(10f);
             }
         }
         yield return new WaitForSeconds(2.5f);
@@ -66,6 +70,11 @@ public class InteractableItem : MonoBehaviour, IInteractable
 
     }
 
+    public void Heath()
+    {
+        player.GetHP(hpRegen);
+        StartCoroutine(Respawn(false));
+    }
 
     private void OnDrawGizmosSelected()
     {
