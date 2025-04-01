@@ -17,6 +17,8 @@ public class EnemyMovement : MonoBehaviour
     private NativeArray<EnemyData> enemyDatas;
     GameObject player;
 
+        
+
     private struct EnemyData
     {
         public float3 position;
@@ -28,6 +30,13 @@ public class EnemyMovement : MonoBehaviour
 
 
     private void Start()
+    {
+        SpawnManager.Instance.OnEnemiesSpawned += Initialize;
+        isPlaying = false;
+    }
+
+    bool isPlaying;
+    public void Initialize()
     {
         listEnemy = SpawnManager.Instance.objects;
         player = GameObject.FindGameObjectWithTag("Player");
@@ -49,6 +58,8 @@ public class EnemyMovement : MonoBehaviour
                 minDistance = listEnemy[i].minDis
             };
         }
+        isPlaying = true;
+
     }
 
     private void OnEnemySlow(Enemy obj)
@@ -64,16 +75,20 @@ public class EnemyMovement : MonoBehaviour
     public LayerMask enemyLayer;
     private void Update()
     {
-
-        var enemyMovementJob = new EnemyMovementJob
+        if (isPlaying)
         {
-            enemies = enemyDatas,
-            deltaTime = Time.deltaTime,
-            pos = player.transform.position,
-        };
+            var enemyMovementJob = new EnemyMovementJob
+            {
+                enemies = enemyDatas,
+                deltaTime = Time.deltaTime,
+                pos = player.transform.position,
+            };
 
-        JobHandle enemyMovementJobHandle = enemyMovementJob.Schedule(transformAccessArray);
-        enemyMovementJobHandle.Complete();
+            JobHandle enemyMovementJobHandle = enemyMovementJob.Schedule(transformAccessArray);
+            enemyMovementJobHandle.Complete();
+        }
+        else return;
+
     }
 
     [BurstCompile]

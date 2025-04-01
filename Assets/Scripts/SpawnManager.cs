@@ -7,6 +7,8 @@ using UnityEngine;
 using UnityEngine.Jobs;
 using Random = UnityEngine.Random;
 using UnityEngine.Pool;
+using System;
+
 public class SpawnManager : Singleton<SpawnManager>
 {
     [SerializeField] public List<Enemy> objects;
@@ -18,15 +20,17 @@ public class SpawnManager : Singleton<SpawnManager>
     bool collectionCheck = true;
     private IObjectPool<Enemy> objectPool;
 
+
+    public event Action OnEnemiesSpawned;
     private void Awake()
     {
         Application.targetFrameRate = 60;
-        SpawnEnemies();
+      //  SpawnEnemies();
     }
 
     private void Start()
     {
-        
+        GameManager.Instance.OnMapCreated += SpawnEnemies;
     }
 
     public void SpawnEnemies()
@@ -55,8 +59,11 @@ public class SpawnManager : Singleton<SpawnManager>
             }
             newEnemy.SetSkin();
             objects.Add(newEnemy);
+
+            if (i == objectCount - 1) OnEnemiesSpawned?.Invoke();
         }
 
+        
     }
 
 

@@ -23,13 +23,26 @@ public class PlayerController : MonoBehaviour, IDamageable
     public GameObject cursor;
 
     public AnimationController1 playerAnimController;
+    public GameObject model;
+    public GameObject drone;
 
     public float hpShield = 50f;
     private void Start()
     {
         hp = maxHP;
+        isPlaying = false;
     }
 
+    bool isPlaying;
+    public void SetSkin(GameObject character)
+    {
+        var player = Instantiate(character,model.transform);
+        playerAnimController = player.GetComponent<AnimationController1>();
+        gun.gameObject.SetActive(true);
+        drone.SetActive(true);
+        shieldFx.SetActive(true);
+        isPlaying = true;
+    }
 
     private void OnTriggerEnter(Collider collision)
     {
@@ -43,28 +56,32 @@ public class PlayerController : MonoBehaviour, IDamageable
 
     public void FixedUpdate()
     {
-        Vector3 direction = Vector3.forward * variableJoystick.Vertical * speed + Vector3.right * variableJoystick.Horizontal *speed;
-        rb.velocity = direction;
-
-        //transform.DOMove(direction, 1f);
-        if(variableJoystick.Horizontal != 0 || variableJoystick.Horizontal != 0)
-        {
-            playerAnimController.PlayAnimation("isMoving",true);
-        }
+        if (!isPlaying) return;
         else
         {
-            playerAnimController.PlayAnimation("isMoving", false);
+            Vector3 direction = Vector3.forward * variableJoystick.Vertical * speed + Vector3.right * variableJoystick.Horizontal * speed;
+            rb.velocity = direction;
+
+            //transform.DOMove(direction, 1f);
+            if (variableJoystick.Horizontal != 0 || variableJoystick.Horizontal != 0)
+            {
+                playerAnimController.PlayAnimation("isMoving", true);
+            }
+            else
+            {
+                playerAnimController.PlayAnimation("isMoving", false);
+            }
+
+            this.transform.rotation = Quaternion.LookRotation(direction);
+            //rb.AddForce(direction * speed * Time.fixedDeltaTime, ForceMode.VelocityChange);
+            /*        if (variableJoystick.Horizontal != 0 || variableJoystick.Vertical != 0)
+                    {
+                        if(!isLookAtEnemy)
+                    }*/
+
+            //   gun.transform.up = rb.velocity;
+
         }
-
-        this.transform.rotation = Quaternion.LookRotation(direction);
-        //rb.AddForce(direction * speed * Time.fixedDeltaTime, ForceMode.VelocityChange);
-        /*        if (variableJoystick.Horizontal != 0 || variableJoystick.Vertical != 0)
-                {
-                    if(!isLookAtEnemy)
-                }*/
-
-        //   gun.transform.up = rb.velocity;
-
     }
 
 

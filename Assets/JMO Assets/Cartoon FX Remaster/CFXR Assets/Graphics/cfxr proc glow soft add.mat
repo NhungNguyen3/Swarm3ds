@@ -8,13 +8,15 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: cfxr proc glow soft add
-  m_Shader: {fileID: -6465566751694194690, guid: 67dfcda17071f4a41be79c4049965e67,
+  m_Shader: {fileID: -6465566751694194690, guid: 22a75a66e9cfc3b49902d12ca7e89e07,
     type: 3}
-  m_ValidKeywords:
-  - _FADING_ON
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
   m_InvalidKeywords:
   - _CFXR_DITHERED_SHADOWS_OFF
   - _CFXR_GLOW_POW_P0
+  - _FADING_ON
   - _SUBGLOW_ON
   - __CFXRGLOW_POW_P4
   - __CFXRGLOW_POW_P6
@@ -24,6 +26,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:

@@ -345,3 +345,12 @@ public class Gun : MonoBehaviour
         fireVfx.SetActive(false);
     }
 }
+
+
+public enum GunType
+{
+    Shortgun,
+    Shortgun_Meteor,
+    Rocket_Barrage,
+    Flamethrower_Inferno,
+}
