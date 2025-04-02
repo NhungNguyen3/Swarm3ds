@@ -13,24 +13,26 @@ public class PlayerController : MonoBehaviour, IDamageable
 
     public float speed;
     public VariableJoystick variableJoystick;
-   public Rigidbody rb;
-
-    public Transform firePoint;
+    public Rigidbody rb;
     public float attackSpeed = .05f;
     public Gun gun;
     float timer;
     public bool isLookAtEnemy = false;
-    public GameObject cursor;
 
     public AnimationController1 playerAnimController;
     public GameObject model;
     public GameObject drone;
 
-    public float hpShield = 50f;
+    public float hpShield;
+    public int shieldStreng = Shader.PropertyToID("_ShieldStreng");
+    public Material shieldMat;
     private void Start()
     {
+        hpShield = 0;
         hp = maxHP;
         isPlaying = false;
+
+        DroneController.OnActiveShield += Shield;
     }
 
     bool isPlaying;
@@ -40,7 +42,7 @@ public class PlayerController : MonoBehaviour, IDamageable
         playerAnimController = player.GetComponent<AnimationController1>();
         gun.gameObject.SetActive(true);
         drone.SetActive(true);
-        shieldFx.SetActive(true);
+      //  shieldFx.SetActive(true);
         isPlaying = true;
     }
 
@@ -54,6 +56,7 @@ public class PlayerController : MonoBehaviour, IDamageable
     }
     public bool canAttack;
 
+    Vector3 dir;
     public void FixedUpdate()
     {
         if (!isPlaying) return;
@@ -62,6 +65,8 @@ public class PlayerController : MonoBehaviour, IDamageable
             Vector3 direction = Vector3.forward * variableJoystick.Vertical * speed + Vector3.right * variableJoystick.Horizontal * speed;
             rb.velocity = direction;
 
+            if (direction != Vector3.zero)
+                dir = direction;
             //transform.DOMove(direction, 1f);
             if (variableJoystick.Horizontal != 0 || variableJoystick.Horizontal != 0)
             {
@@ -71,8 +76,8 @@ public class PlayerController : MonoBehaviour, IDamageable
             {
                 playerAnimController.PlayAnimation("isMoving", false);
             }
-
-            this.transform.rotation = Quaternion.LookRotation(direction);
+            Debug.Log(dir);
+            this.transform.rotation = Quaternion.LookRotation(dir);
             //rb.AddForce(direction * speed * Time.fixedDeltaTime, ForceMode.VelocityChange);
             /*        if (variableJoystick.Horizontal != 0 || variableJoystick.Vertical != 0)
                     {
@@ -84,6 +89,13 @@ public class PlayerController : MonoBehaviour, IDamageable
         }
     }
 
+    public void Shield(float value)
+    {
+        hpShield = (value/100) * maxHP;
+        shieldFx.SetActive(true);
+        shieldMat.SetFloat(shieldStreng, 1f);
+        shieldMaxHp = hpShield;
+    }
 
     public void GetHP(float value)
     {
@@ -99,15 +111,16 @@ public class PlayerController : MonoBehaviour, IDamageable
         /* Dead();*/
 
     }
-    
+    float shieldMaxHp;
     public float hp;
     public float maxHP;
     public GameObject shieldFx;
     public void GetDmg(float dmg)
     {
-        if(hpShield >=0 )
+        if(hpShield >0 )
         {
             hpShield -= dmg;
+            shieldMat.SetFloat(shieldStreng, hpShield/ shieldMaxHp);
         }
         else
         {

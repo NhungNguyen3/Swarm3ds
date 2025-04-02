@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using System;
 
 
 public class DroneController : MonoBehaviour
@@ -9,24 +10,46 @@ public class DroneController : MonoBehaviour
     public Gun gun;
 
     public float attackSpeed = 3f;
-    float timer;
     public float detectionRadius = 50f;
     public LayerMask enemyLayer;
     public bool canAttack;
 
+    public float shieldCD = 6f;
+    public float healthCD = 4f;
+
+    public static event Action<float> OnActiveShield;
+
+    float timer;
+    float timerShield;
+    float timerHealth;
+
     private void Update()
     {
         timer -= Time.deltaTime;
+        timerShield -= Time.deltaTime;
+        timerHealth -= Time.deltaTime;
+
         if (timer <= 0)
         {
             timer = attackSpeed;
             canAttack = true;
             FindClosetEnemy();
         }
+
+        if (timerShield <= 0)
+        {
+            timerShield = shieldCD;
+            CreateShield();
+        }
+        
+        if (timerHealth <= 0)
+        {
+            timerHealth = healthCD;
+        }
     }
 
 
-    
+    #region Attack
     public void FindClosetEnemy()
     {
         Transform closestEnemy = null;
@@ -64,6 +87,20 @@ public class DroneController : MonoBehaviour
         }
         yield return null;
     }
+    #endregion
+
+    #region Shield
+    public float shieldRatio;
+
+    public void CreateShield()
+    {
+        OnActiveShield?.Invoke(shieldRatio);
+    }
+    #endregion
+
+    #region Health
+
+    #endregion
 
     private void OnDrawGizmosSelected()
     {

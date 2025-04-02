@@ -9,7 +9,7 @@ using UnityEngine.ResourceManagement.ResourceLocations;
 [CreateAssetMenu(fileName = "AudioClipData", menuName = "AudioClipData", order = 0)]
 public class AudioClipData : ScriptableObject
 {
-    [SerializeField] List<AudioClipAsset> audioClipAssets;
+    [SerializeField] public List<AudioClipAsset> audioClipAssets;
     public void Add(AudioClip item, IResourceLocation location)
     {
         audioClipAssets.Add(new AudioClipAsset(item, location));

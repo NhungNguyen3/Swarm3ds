@@ -27,7 +27,7 @@ public class SoundManager : Singleton<SoundManager>
     void Start()
     {
        // UserDataManager.Instance.OnDataLoaded += SetUserData;
-        if (preLoad)
+        //if (preLoad)
             LoadAudioClipPrefab();
 
         isMusicOn = true;
@@ -66,6 +66,8 @@ public class SoundManager : Singleton<SoundManager>
             Debug.Log(item.ToString());
             audioClipCatalogue.Add(tmp.Result, item);
             audioClips.Add(tmp.Result);
+            Debug.Log(audioClipCatalogue.audioClipAssets.Count);
+            Debug.Log(audioClips.Count);
         }
     }
 
@@ -93,7 +95,7 @@ public class SoundManager : Singleton<SoundManager>
 /*        if (!isSoundOn) return;
         else
         {*/
-            var audioClip = audioClipPlayeds.Find(x => x.name == audioClipName.ToString());
+            var audioClip = audioClips.Find(x => x.name == audioClipName.ToString());
             if (audioClip)
             {
                 sfxSource.PlayOneShot(audioClip, volumne);
@@ -112,7 +114,7 @@ public class SoundManager : Singleton<SoundManager>
 
     public void PlayMusic(SoundName audioClipName, float volumne)
     {
-        var audioClip = audioClipPlayeds.Find(x => x.name == audioClipName.ToString());
+        var audioClip = audioClips.Find(x => x.name == audioClipName.ToString());
         if (audioClip)
         {
             bgmSource.clip = audioClip;

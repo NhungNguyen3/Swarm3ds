@@ -57,9 +57,10 @@ Material:
     m_Floats:
     - _QueueControl: 0
     - _QueueOffset: 7
+    - _ShieldStreng: 0
     - _fresnelValue: 2
     m_Colors:
     - _BackColor: {r: 2.907322, g: 0.42090476, b: 0.3017029, a: 1}
-    - _FresnelColor: {r: 0.012494854, g: 0, b: 0.0171441, a: 1}
-    - _FrontColor: {r: 0, g: 1.5819247, b: 3.4415903, a: 1}
+    - _FresnelColor: {r: 0.03960988, g: 0.0011210275, b: 0.01632405, a: 0}
+    - _FrontColor: {r: 0, g: 3.6343088, b: 7.9066987, a: 1}
   m_BuildTextureStacks: []
